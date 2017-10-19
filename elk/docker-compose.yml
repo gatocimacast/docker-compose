@@ -1,0 +1,41 @@
+elasticsearch:
+  image: elasticsearch:1.7.3
+  command: elasticsearch  -Des.network.host=0.0.0.0
+  ports:
+    - "9200:9200"
+
+logstash:
+  image: logstash:2.0.0
+  volumes:
+    - ./logstash/conf:/conf
+  links:
+    - elasticsearch:elasticsearch
+  command: logstash -f conf/logspout.conf
+  ports:
+    - "5000:5000"
+    - "5000:5000/udp"
+
+kibana:
+  image: kibana:4.1.2
+  links:
+    - elasticsearch
+  command: kibana -q
+  ports:
+    - "5601:5601"
+
+logspout:
+  build: logspout/
+  links:
+    - logstash
+  volumes:
+    - /var/run/docker.sock:/tmp/docker.sock
+  environment:
+    - ROUTE_URIS=logstash://logstash:5000
+
+portainer:
+  image: portainer/portainer
+  command: --no-auth -H unix:///var/run/docker.sock
+  volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+  ports:
+    - "9000:9000"
