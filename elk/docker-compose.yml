@@ -10,10 +10,10 @@ logstash:
     - ./logstash/conf:/conf
   links:
     - elasticsearch:elasticsearch
-  command: logstash -f conf/logspout.conf
-  ports:
-    - "5000:5000"
-    - "5000:5000/udp"
+  command: logstash -f ./conf/logspout.conf
+  expose:
+    - "5000"
+    - "5000/udp"
 
 kibana:
   image: kibana:4.1.2
